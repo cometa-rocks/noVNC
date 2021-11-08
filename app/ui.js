@@ -982,16 +982,52 @@ const UI = {
             .classList.remove("noVNC_open");
     },
 
-    connect(event, password) {
+    async connect(event, password) {
 
         // Ignore when rfb already exists
         if (typeof UI.rfb !== 'undefined') {
             return;
         }
 
-        const host = UI.getSetting('host');
-        const port = UI.getSetting('port');
-        const path = UI.getSetting('path');
+        let host = UI.getSetting('host');
+        let port = UI.getSetting('port');
+        let path = UI.getSetting('path');
+
+        // check if port is 4444 and path contains feature_result_id
+        if (path.includes('feature_result_id/')) {
+            // set selenoid variables
+            host = window.location.hostname;
+            port = window.location.port;
+            
+            // get feature_result_id from path
+            const feature_result_id = path.split("/")[1]
+            // ask django about the feature_result_id
+            const response = await fetch(`/backend/noVNC/${feature_result_id}/`);
+            const response_data = await response.json();
+            // check if response return success True or False
+            if (!response_data.success) {
+                Log.Error(response_data.error);
+                UI.showStatus(_(response_data.error), 'error');
+                return;
+            }
+            // get session_id from response
+            const session_id = response_data.session_id;
+
+            // check if session_id is null if so throw an error
+            if ( session_id == null ) {
+                Log.Error("Seems like feature has not started yet... maybe try again in few secconds.");
+                UI.showStatus(_("Seems like feature has not started yet... maybe try again in few secconds."), 'error');
+                return;
+            }
+
+            // update path with end URL
+            path = `vnc/${session_id}`;
+            
+        } else {
+            Log.Error("Missing feature_result_id in path");
+            UI.showStatus(_("Missing feature_result_id in path"), 'error');
+            return;
+        }
 
         if (typeof password === 'undefined') {
             password = WebUtil.getConfigVar('password');
