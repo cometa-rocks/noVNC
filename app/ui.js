@@ -1023,9 +1023,37 @@ const UI = {
             // update path with end URL
             path = `vnc/${session_id}`;
             
+        } else if (path.includes('mobile/')) {
+            console.log("Inside the mobile_container")
+            // set selenoid variables
+            host = window.location.hostname;
+            port = window.location.port;
+            
+            // get feature_result_id from path
+            const container_service_id = path.split("/")[1]
+            // ask django about the feature_result_id
+            const response = await fetch(`/backend/api/container_service/?service_id=${container_service_id}`);
+            const response_data = await response.json();
+            // check if response return success True or False
+            if (!response_data.success) {
+                Log.Error(response_data.error);
+                UI.showStatus(_(response_data.error), 'error');
+                return;
+            }
+
+            // check if session_id is null if so throw an error
+            if ( response_data.containerservices==undefined) {
+                Log.Error("Seems like mobile has not started yet... maybe try again in few secconds.");
+                UI.showStatus(_("Seems like mobile has not started yet... maybe try again in few secconds."), 'error');
+                return;
+            }
+
+            // update path with end URL
+            path = `mobile_vnc/${response_data.containerservices[0].hostname}`;
+            
         } else {
-            Log.Error("Missing feature_result_id in path");
-            UI.showStatus(_("Missing feature_result_id in path"), 'error');
+            Log.Error("Please provide the feature_result_id or mobile service_id in path");
+            UI.showStatus(_("Please provide the feature_result_id or mobile service_id in path"), 'error');
             return;
         }
 

@@ -1,0 +1,18 @@
+services:
+  mobile-novnc:
+    build: 
+      context: .  # Build context, specifying the current directory
+      dockerfile: Dockerfile  # Reference to the Dockerfile
+    container_name: cometa_mobile_novnc
+    volumes:
+      - .:/home/cometa/novnc/noVNC
+    ports:
+    - "6085:6081"
+    - "6086:6080"
+
+networks:
+  testing:
+    driver: "bridge"
+
+volumes:
+  mobile_build:
