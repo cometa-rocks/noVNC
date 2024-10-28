@@ -1031,25 +1031,28 @@ const UI = {
             
             // get feature_result_id from path
             const container_service_id = path.split("/")[1]
+            let hostname = container_service_id;
+            if (container_service_id.length>20) {
             // ask django about the feature_result_id
-            const response = await fetch(`/backend/api/container_service/?service_id=${container_service_id}`);
-            const response_data = await response.json();
-            // check if response return success True or False
-            if (!response_data.success) {
-                Log.Error(response_data.error);
-                UI.showStatus(_(response_data.error), 'error');
-                return;
-            }
-
-            // check if session_id is null if so throw an error
-            if ( response_data.containerservices==undefined) {
-                Log.Error("Seems like mobile has not started yet... maybe try again in few secconds.");
-                UI.showStatus(_("Seems like mobile has not started yet... maybe try again in few secconds."), 'error');
-                return;
+                const response = await fetch(`/backend/api/container_service/?service_id=${container_service_id}`);
+                const response_data = await response.json();
+                // check if response return success True or False
+                if (!response_data.success) {
+                    Log.Error(response_data.error);
+                    UI.showStatus(_(response_data.error), 'error');
+                    return;
+                }
+                // check if session_id is null if so throw an error
+                if ( response_data.containerservices==undefined) {
+                    Log.Error("Seems like mobile has not started yet... maybe try again in few secconds.");
+                    UI.showStatus(_("Seems like mobile has not started yet... maybe try again in few secconds."), 'error');
+                    return;
+                }
+                hostname = response_data.containerservices[0].hostname
             }
 
             // update path with end URL
-            path = `mobile_vnc/${response_data.containerservices[0].hostname}`;
+            path = `mobile_vnc/${hostname}`;
             
         } else {
             Log.Error("Please provide the feature_result_id or mobile service_id in path");

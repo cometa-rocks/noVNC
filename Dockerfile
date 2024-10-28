@@ -7,7 +7,7 @@ FROM ubuntu:20.04
 RUN useradd -ms /bin/bash cometa
 
 # set directory for sdk 
-WORKDIR /home/cometa/noVNC
+WORKDIR /home/cometa/
 
 # Install Node.js, npm, git, and other build dependencies
 RUN apt-get update && apt-get install -y \
@@ -22,6 +22,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean
 
 
+# RUN git clone https://github.com/cometa-rocks/noVNC.git
+
+WORKDIR /home/cometa/noVNC
 # COPY . .
 # RUN npm install -g npm@10.9.0
 # RUN npm install
