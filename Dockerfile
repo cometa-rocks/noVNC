@@ -25,11 +25,10 @@ RUN apt-get update && apt-get install -y \
 # RUN git clone https://github.com/cometa-rocks/noVNC.git
 
 WORKDIR /home/cometa/noVNC
-# COPY . .
-# RUN npm install -g npm@10.9.0
-# RUN npm install
-# RUN npm run build
+COPY . .
 
-# Start VNC, Xvfb, noVNC and Emulator
 # CMD ./utils/novnc_proxy --listen 0.0.0.0:6080
 CMD ["./utils/novnc_proxy", "--listen", "80"]
+
+# build image for arm and amd processors 
+# docker buildx build --platform linux/amd64,linux/arm64 -t cometa/novnc:latest --push .
