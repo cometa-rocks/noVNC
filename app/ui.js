@@ -992,7 +992,8 @@ const UI = {
         let host = UI.getSetting('host');
         let port = UI.getSetting('port');
         let path = UI.getSetting('path');
-
+        
+        let newPassword = password
         // check if port is 4444 and path contains feature_result_id
         if (path.includes('feature_result_id/')) {
             // set selenoid variables
@@ -1015,13 +1016,15 @@ const UI = {
 
             // check if session_id is null if so throw an error
             if ( session_id == null ) {
-                Log.Error("Seems like feature has not started yet... maybe try again in few secconds.");
-                UI.showStatus(_("Seems like feature has not started yet... maybe try again in few secconds."), 'error');
+                Log.Error("Seems like feature has not started yet... maybe try again in few seconds.");
+                UI.showStatus(_("Seems like feature has not started yet... maybe try again in few seconds."), 'error');
                 return;
             }
 
             // update path with end URL
-            path = `vnc/${session_id}`;
+            // path = `vnc/${session_id}`;
+            path = response_data.vnc_path;
+            newPassword = response_data.password
             
         } else if (path.includes('mobile/')) {
             console.log("Inside the mobile_container")
@@ -1060,13 +1063,15 @@ const UI = {
             return;
         }
 
-        if (typeof password === 'undefined') {
-            password = WebUtil.getConfigVar('password');
-            UI.reconnectPassword = password;
+        // password = newPassword;
+
+        if (typeof newPassword === 'undefined') {
+            newPassword = WebUtil.getConfigVar('password');
+            UI.reconnectPassword = newPassword;
         }
 
-        if (password === null) {
-            password = undefined;
+        if (newPassword === null) {
+            newPassword = undefined;
         }
 
         UI.hideStatus();
@@ -1094,7 +1099,7 @@ const UI = {
         UI.rfb = new RFB(document.getElementById('noVNC_container'), url,
                          { shared: UI.getSetting('shared'),
                            repeaterID: UI.getSetting('repeaterID'),
-                           credentials: { password: password } });
+                           credentials: { password: newPassword } });
         UI.rfb.addEventListener("connect", UI.connectFinished);
         UI.rfb.addEventListener("disconnect", UI.disconnectFinished);
         UI.rfb.addEventListener("credentialsrequired", UI.credentials);
